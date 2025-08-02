@@ -1,0 +1,13 @@
+# Example terraform.tfvars for Terraform State Management Infrastructure
+# Copy this file to terraform.tfvars and update the values
+
+# Required variables
+project_id = "your-gcp-project-id"
+
+# Optional variables with defaults
+region = "us-central1"
+zone   = "us-central1-a"
+
+# Terraform state bucket
+terraform_state_bucket_name = "terraform-state-bucket"
+storage_location = "US" 
