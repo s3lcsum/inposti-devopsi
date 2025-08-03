@@ -5,6 +5,9 @@ argocd:
   redis-ha:
     enabled: true
 
+  redisSecretInit:
+    enabled: false
+
   controller:
     replicas: 1
 

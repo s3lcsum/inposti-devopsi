@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/s3lcsum/inposti-devopsi.git
     targetRevision: HEAD
-    path: argocd-instances
+    path: argocd-instance
   destination:
     # self-management
     server: https://kubernetes.default.svc
