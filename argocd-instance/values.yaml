@@ -43,7 +43,7 @@ argocd-apps:
             - values.yaml
       destination:
         namespace: argocd
-        name: in-cluster
+        server: https://kubernetes.default.svc
       syncPolicy:
         automated:
           prune: true
@@ -76,7 +76,7 @@ argocd-apps:
           jsonnet: {}
       destination:
         namespace: argocd
-        name: in-cluster
+        server: https://kubernetes.default.svc
       syncPolicy:
         automated:
           prune: true
@@ -110,8 +110,6 @@ argocd-apps:
       destinations:
         - namespace: argocd
           server: https://kubernetes.default.svc
-        - namespace: '*'
-          server: '*'
       clusterResourceWhitelist:
         - group: '*'
           kind: '*'
