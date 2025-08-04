@@ -1,0 +1,14 @@
+
+
+on:
+  pull_request:
+    branches:
+      - main
+
+
+# Basically runs the pre-commit  for changed files and tries to auto-fix 
+# if fix detected, automatically push commit to PR branch
+# If not just fail with proper mesasge and comment to PR
+# 
+# Note: This requires additional application as defautl {{ github_token }} 
+# have some limitations on re-running gihtub workflows
