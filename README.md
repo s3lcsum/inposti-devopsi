@@ -1,4 +1,4 @@
-# DevOps Infrastructure Task - Job Interview Requirements
+# DevOps Infrastructure Task 
 
 ## Project Structure
 
