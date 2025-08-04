@@ -22,6 +22,12 @@ argocd:
   extraArgs:
     - --insecure  # Disable internal TLS (use when TLS is terminated at ingress)
 
+  # ArgoCD Configuration
+  configs:
+    cm:
+      # Enable exec/terminal access
+      exec.enabled: "true"
+
 # ArgoCD Apps configuration
 argocd-apps:
   # Bootstrap applications that will manage all other resources

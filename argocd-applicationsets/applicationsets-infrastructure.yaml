@@ -17,12 +17,12 @@ spec:
           - clusters:
               selector:
                 matchExpressions:
-                  - key: cluster
+                  - key: environment
                     operator: In
                     values:
-                      - eng-global-cluster
-                      - dev-global-cluster-0
-                      - prd-global-cluster-5
+                      - eng
+                      - dev
+                      - prd
 
   template:
     metadata:
