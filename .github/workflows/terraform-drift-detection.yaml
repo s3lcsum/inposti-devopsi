@@ -6,6 +6,6 @@ on:
 
 
 # This workflow basically would do terraform plan for every possible case
-# if detects any "drift" then would notify team about it. 
-# 
+# if detects any "drift" then would notify team about it.
+#
 # by drift I mean any manual changes from the console the that are not reflected in the code

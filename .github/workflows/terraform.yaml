@@ -1,9 +1,21 @@
 name: Terraform
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
-jobs:
-  plan: 
+
+# This workflow would be used for terraform plan on opened PR
+# and PR would require all plan jobs to pass, otherwise block
+# merge.
+#
+# Then after merge it would perform terraform apply with prepared
+# before, for every env. If production env then using Github Repo
+# settings it would require additional approval (GitHub Environment)
+#
+# Additionally it would sending notifications and comments to PR
+# and to pipeline summary

@@ -4,10 +4,10 @@
 config {
   # Enable module inspection
   module = true
-  
+
   # Disable color output in CI environments
   color = true
-  
+
   # Enable specific rule sets
   disabled_by_default = false
 }
