@@ -1,6 +1,3 @@
-# Cloud SQL Module using Community Module
-# This module creates a PostgreSQL instance using the official terraform-google-modules
-
 module "postgresql" {
   source  = "terraform-google-modules/sql-db/google//modules/postgresql"
   version = "~> 26.1"
