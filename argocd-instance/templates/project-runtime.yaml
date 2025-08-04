@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: runtime
+  namespace: argocd
+spec:
+  description: Runtime applications project for Development and Production environments
+  
+  # Source repositories
+  sourceRepos:
+    - 'https://github.com/s3lcsum/inposti-devopsi.git'
+  
+  # Destination clusters and namespaces
+  destinations:
+    - namespace: '*-dev'
+      server: https://10.89.1.7:6443
+    - namespace: '*-prd'
+      server: https://10.89.1.8:6443
+  
+  # Cluster resource allow list
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource allow list
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ServiceAccount
+    - group: apps
+      kind: Deployment
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+  
+  # Roles for RBAC
+  roles:
+    - name: developer
+      description: Developer role with read access
+      policies:
+        - p, proj:runtime-project:developer, applications, get, runtime-project/*, allow
+        - p, proj:runtime-project:developer, applications, sync, runtime-project/*, allow
+      groups:
+        - developers
+    
+    - name: admin
+      description: Admin role with full access
+      policies:
+        - p, proj:runtime-project:admin, applications, *, runtime-project/*, allow
+      groups:
+        - admins 
