@@ -3,7 +3,7 @@
 
 module "gcs_buckets" {
   source  = "terraform-google-modules/cloud-storage/google"
-  version = "~> 11.0"
+  version = "11.0.0"
 
   project_id = var.project_id
   names      = [var.bucket_name]

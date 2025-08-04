@@ -1,4 +1,4 @@
-
+apiVersion: v2
 name: argocd-instance
 description: Complete ArgoCD installation with all applications, projects, and applicationsets
 type: application

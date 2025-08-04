@@ -4,7 +4,7 @@
 # VPC Peering from engineering to runtime
 module "peering_engineering_to_runtime" {
   source  = "terraform-google-modules/network/google//modules/network-peering"
-  version = "~> 11.1"
+  version = "11.1.1"
 
   prefix        = "engineering-to-runtime"
   local_network = var.engineering_vpc_self_link
@@ -17,7 +17,7 @@ module "peering_engineering_to_runtime" {
 # VPC Peering from runtime to engineering (bidirectional)
 module "peering_runtime_to_engineering" {
   source  = "terraform-google-modules/network/google//modules/network-peering"
-  version = "~> 11.1"
+  version = "11.1.1"
 
   prefix        = "runtime-to-engineering"
   local_network = var.runtime_vpc_self_link
@@ -32,7 +32,7 @@ module "peering_runtime_to_engineering" {
 # Firewall rules for engineering to runtime communication
 module "firewall_engineering_to_runtime" {
   source  = "terraform-google-modules/network/google//modules/firewall-rules"
-  version = "~> 11.1"
+  version = "11.1.1"
 
   project_id   = var.project_id
   network_name = var.runtime_vpc_name
@@ -69,7 +69,7 @@ module "firewall_engineering_to_runtime" {
 # Firewall rules for runtime to engineering communication
 module "firewall_runtime_to_engineering" {
   source  = "terraform-google-modules/network/google//modules/firewall-rules"
-  version = "~> 11.1"
+  version = "11.1.1"
 
   project_id   = var.project_id
   network_name = var.engineering_vpc_name

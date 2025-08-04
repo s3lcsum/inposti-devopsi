@@ -1,6 +1,6 @@
 module "postgresql" {
   source  = "terraform-google-modules/sql-db/google//modules/postgresql"
-  version = "~> 26.1"
+  version = "26.1.1"
 
   name                = var.instance_name
   project_id          = var.project_id

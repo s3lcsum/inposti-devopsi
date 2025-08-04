@@ -1,5 +1,5 @@
 # Basic ArgoCD Configuration
-# This values.yaml provides a minimal, production-ready ArgoCD setup
+
 argocd:
 
   # Global configuration
@@ -17,6 +17,8 @@ argocd:
     # Enable metrics
     metrics:
       enabled: true
+
+  # TODO: Here should be cluster configuration for dev and prd, so they will be used in applicationsets
 
 # ArgoCD Apps configuration
 argocd-apps:
