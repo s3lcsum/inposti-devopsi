@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://github.com/s3lcsum/inposti-devopsi.git
+              revision: HEAD
+              directories:
+                - path: charts/runtime/*
+                - path: charts/runtime/values
+                  exclude: true
+          - clusters:
+              selector:
+                matchExpressions:
+                  - key: cluster
+                    operator: In
+                    values:
+                      - eng-global-cluster
+                      - dev-global-cluster-0
+                      - prd-global-cluster-5
+
+  template:
+    metadata:
+      name: '{{path.basename}}-{{environment}}-{{region}}'
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: '{{path.basename}}'
+        app.kubernetes.io/environment: '{{environment}}'
+        app.kubernetes.io/component: infrastructure
+        app.kubernetes.io/region: '{{region}}'
+    spec:
+      project: infrastructure
+      source:
+        repoURL: https://github.com/s3lcsum/inposti-devopsi.git
+        targetRevision: HEAD
+        path: '{{path}}'
+        helm:
+          ignoreMissingValueFiles: true
+          valueFiles:
+            - values.yaml
+            - '../values/{{environment}}/{{path.basename}}.yaml'
+            - '../values/{{environment}}/{{region}}/{{path.basename}}.yaml'
+      destination:
+        server: '{{url}}'
+        namespace: '{{path.basename}}-{{environment}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+      revisionHistoryLimit: 10

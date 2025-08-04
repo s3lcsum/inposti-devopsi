@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: runtime
+  namespace: argocd
+spec:
+  description: Project for runtime application charts across all environments
+  
+  sourceRepos:
+    - 'https://github.com/s3lcsum/inposti-devopsi.git'
+  
+  destinations:
+    - namespace: '*-dev'
+      server: '*'
+    - namespace: '*-prd'
+      server: '*'
+
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  # Roles for RBAC
+  roles:
+    - name: developer
+      description: Developer role with read and sync access
+      policies:
+        - p, proj:runtime:developer, applications, get, runtime/*, allow
+        - p, proj:runtime:developer, applications, sync, runtime/*, allow
+      groups:
+        - developers
+    
+    - name: admin
+      description: Admin role with full access
+      policies:
+        - p, proj:runtime:admin, applications, *, runtime/*, allow
+      groups:
+        - admins

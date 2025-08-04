@@ -1,45 +1,130 @@
+# Basic ArgoCD Configuration
+# This values.yaml provides a minimal, production-ready ArgoCD setup
 argocd:
-  redis-ha:
+
+  # Global configuration
+  global:
+  # Set logging format (text or json)
+  logging:
+    format: "json"
+    level: "info"
+
+  # ArgoCD Server configuration
+  server:
+  # Replicas for high availability
+  replicas: 2
+
+  # Enable metrics
+  metrics:
     enabled: true
 
-  redisSecretInit:
-    enabled: false
+  # Additional command arguments
+  extraArgs:
+    - --insecure  # Disable internal TLS (use when TLS is terminated at ingress)
 
-  controller:
-    replicas: 1
+# ArgoCD Apps configuration
+argocd-apps:
+  # Bootstrap applications that will manage all other resources
+  applications:
+    argocd:
+      namespace: argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      project: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      source:
+        path: argocd-instance
+        repoURL: https://github.com/s3lcsum/inposti-devopsi.git
+        targetRevision: main
+        helm:
+          version: v3
+          valueFiles:
+            - values.yaml
+      destination:
+        namespace: argocd
+        name: in-cluster
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+          - ServerSideApply=true
+        retry:
+          limit: 3
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
 
-  server:
-    replicas: 2
+    argocd-applicationsets:
+      namespace: argocd
+      additionalLabels: {}
+      project: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      source:
+        path: argocd-applicationsets
+        repoURL: https://github.com/s3lcsum/inposti-devopsi.git
+        targetRevision: main
+        directory:
+          recurse: true
+          jsonnet: {}
+      destination:
+        namespace: argocd
+        name: in-cluster
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+        managedNamespaceMetadata:
+          labels:
+            layer: core
+        retry:
+          limit: 3
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
 
-  repoServer:
-    replicas: 2
+  # Bootstrap project for ArgoCD self-management
+  projects:
+    argocd:
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: ArgoCD Project for self-management
+      sourceRepos:
+        - 'https://github.com/s3lcsum/inposti-devopsi.git'
+      destinations:
+        - namespace: argocd
+          server: https://kubernetes.default.svc
+        - namespace: '*'
+          server: '*'
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+      namespaceResourceBlacklist: []
+      namespaceResourceWhitelist:
+        - group: '*'
+          kind: '*'
+      orphanedResources:
+        warn: false
+      roles:
+        - name: argocd-admin
+          description: Full access to ArgoCD project
+          policies:
+            - p, proj:argocd:argocd-admin, *, *, *, allow
+          groups: []
 
-  applicationSet:
-    replicas: 2
-
-  configs:
-    # External cluster credentials for dev and prd environments
-    clusterCredentials:
-      dev-global-cluster-0:
-        server: https://10.89.1.7:6443
-        labels:
-          environment: dev
-          region: us-central1
-        annotations:
-          managed-by: argocd
-          cluster-ip: "10.89.1.7"
-        config:
-          tlsClientConfig:
-            insecure: true
-      
-      prd-global-cluster-5:
-        server: https://10.89.1.8:6443
-        labels:
-          environment: prd
-          region: us-central1
-        annotations:
-          managed-by: argocd
-          cluster-ip: "10.89.1.8"
-        config:
-          tlsClientConfig:
-            insecure: true

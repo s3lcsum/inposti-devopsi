@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  description: Project for infrastructure charts (traefik, cert-manager, etc.) across all clusters
+  
+  sourceRepos:
+    - 'https://github.com/s3lcsum/inposti-devopsi.git'
+  
+  destinations:
+    - namespace: '*'
+      server: '*'
+
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  roles:
+    - name: infrastructure-admin
+      description: Infrastructure admin role with full access
+      policies:
+        - p, proj:infrastructure:infrastructure-admin, applications, *, infrastructure/*, allow
+      groups:
+        - infrastructure-admins
+        - platform-engineers
+    

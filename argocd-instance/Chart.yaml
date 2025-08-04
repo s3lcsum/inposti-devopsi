@@ -1,4 +1,4 @@
-apiVersion: v2
+
 name: argocd-instance
 description: Complete ArgoCD installation with all applications, projects, and applicationsets
 type: application
@@ -8,4 +8,7 @@ appVersion: "v3.0.5"
 dependencies:
 - name: argo-cd
   version: 8.0.16
+  repository: https://argoproj.github.io/argo-helm
+- name: argocd-apps
+  version: 2.0.2
   repository: https://argoproj.github.io/argo-helm
