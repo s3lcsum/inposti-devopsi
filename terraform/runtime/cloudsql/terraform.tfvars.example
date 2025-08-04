@@ -6,9 +6,10 @@ project_id = "your-gcp-project-id"
 cloudsql_password = "your-secure-cloudsql-password"
 
 # Environment-specific variables
-# Use one of the following files from terraform/runtime/variables/:
+# Use one of the following files from terraform/variables/:
 # - dev/us-central1.tfvars (for development)
 # - prd/us-central1.tfvars (for production)
+# - env/us-central1.tfvars (for engineering)
 
 # Example usage:
-# terraform plan -var-file="../variables/dev/us-central1.tfvars" 
+# terraform plan -var-file="../../variables/dev/us-central1.tfvars"

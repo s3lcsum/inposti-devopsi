@@ -11,18 +11,18 @@ spec:
               repoURL: https://github.com/s3lcsum/inposti-devopsi.git
               revision: HEAD
               directories:
-                - path: charts/runtime/*
-                - path: charts/runtime/values
+                - path: charts/infrastructure/*
+                - path: charts/infrastructure/values
                   exclude: true
           - clusters:
               selector:
                 matchExpressions:
-                  - key: environment
+                  - key: cluster
                     operator: In
                     values:
-                      - eng
-                      - dev
-                      - prd
+                      - eng-global-cluster
+                      - dev-global-cluster-0
+                      - prd-global-cluster-0
 
   template:
     metadata:

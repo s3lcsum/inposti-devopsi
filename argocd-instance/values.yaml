@@ -4,29 +4,19 @@ argocd:
 
   # Global configuration
   global:
-  # Set logging format (text or json)
-  logging:
-    format: "json"
-    level: "info"
+    # Set logging format (text or json)
+    logging:
+      format: "json"
+      level: "info"
 
-  # ArgoCD Server configuration
-  server:
-  # Replicas for high availability
-  replicas: 2
+    # ArgoCD Server configuration
+    server:
+      # Replicas for high availability
+      replicas: 2
 
-  # Enable metrics
-  metrics:
-    enabled: true
-
-  # Additional command arguments
-  extraArgs:
-    - --insecure  # Disable internal TLS (use when TLS is terminated at ingress)
-
-  # ArgoCD Configuration
-  configs:
-    cm:
-      # Enable exec/terminal access
-      exec.enabled: "true"
+    # Enable metrics
+    metrics:
+      enabled: true
 
 # ArgoCD Apps configuration
 argocd-apps:
@@ -131,4 +121,3 @@ argocd-apps:
           policies:
             - p, proj:argocd:argocd-admin, *, *, *, allow
           groups: []
-

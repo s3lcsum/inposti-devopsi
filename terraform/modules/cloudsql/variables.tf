@@ -1,3 +1,5 @@
+# Variables for the community Cloud SQL module
+
 variable "project_id" {
   description = "The ID of the project to deploy to"
   type        = string
@@ -54,4 +56,4 @@ variable "deletion_protection" {
   description = "Whether to enable deletion protection"
   type        = bool
   default     = true
-} 
+}

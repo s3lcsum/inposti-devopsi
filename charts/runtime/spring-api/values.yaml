@@ -1,59 +1,31 @@
-# Default values for Spring Boot API
-# This is a YAML-formatted file.
-
-# Environment configuration
-environment: dev
-springProfile: dev
-
-# Replica count (3 for dev, 5 for prd)
-replicaCount: 3
-
-# Container image
 image:
   repository: busybox
   tag: "stable"
   pullPolicy: IfNotPresent
 
-# Service account
-serviceAccount:
-  create: true
-  automount: true
-
-# Pod annotations (for checksum injection)
-podAnnotations: {}
-
-# Pod labels
-podLabels: {}
-
-# Security context
-podSecurityContext: {}
-securityContext: {}
-
-# Service configuration
-service:
-  type: ClusterIP
-  ports:
-    - name: api
-      port: 8080
-      targetPort: 8080
-    - name: logs
-      port: 8081
-      targetPort: 8081
-    - name: soap
-      port: 8082
-      targetPort: 8082
 
 # Ingress configuration
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
+  host: spring-api.inposti-devopsi.com
+  paths:
+    - path: /api
+      pathType: Prefix
+      port: 8080
+    - path: /logs
+      pathType: Prefix
+      port: 8081
+    - path: /soap
+      pathType: Prefix
+      port: 8082
+  tls:
+    - hosts:
+        - spring-api.inposti-devopsi.com
+      # TODO: Use cert-manager to automatically create the TLS secret
+      secretName: spring-api-tls
+
+# ------------------------------------------
+# Deployment Configuration
+# ------------------------------------------
 
 # Resource allocation
 resources:
@@ -64,7 +36,6 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-# Health checks (TCP on port 8080)
 livenessProbe:
   tcpSocket:
     port: 8080
@@ -81,70 +52,50 @@ readinessProbe:
   timeoutSeconds: 3
   failureThreshold: 3
 
-# Rolling update strategy (zero downtime)
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 1
-    maxUnavailable: 0
+# ------------------------------------------
+# ConfigMap Configuration
+# ------------------------------------------
 
-# Container ports
-ports:
-  - name: api
-    containerPort: 8080
-    protocol: TCP
-  - name: logs
-    containerPort: 8081
-    protocol: TCP
-  - name: soap
-    containerPort: 8082
-    protocol: TCP
-
-# Pre-stop hook
-preStopHook:
-  command:
-    - /bin/sh
-    - -c
-    - "wget http://localhost:8080/service/shutdown"
-
-# ConfigMap with sample JSON
 configMap:
-  enabled: true
+  mountPath: "/app/config.json"
+  subPath: "config.json"
   data:
     config.json: |
       {
-        "application": {
-          "name": "spring-boot-api",
-          "version": "1.0.0"
-        },
-        "database": {
-          "url": "jdbc:postgresql://localhost:5432/appdb",
-          "pool": {
-            "initialSize": 5,
-            "maxSize": 20
-          }
-        },
         "logging": {
           "level": "INFO",
-          "pattern": "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-        },
-        "security": {
-          "enabled": true,
-          "jwt": {
-            "secret": "your-secret-key",
-            "expiration": 3600
-          }
         }
       }
 
-# Secret with randomly generated key-values
-secret:
-  enabled: true
-  data:
-    DB_PASSWORD: "{{ randAlphaNum 32 }}"
-    JWT_SECRET: "{{ randAlphaNum 64 }}"
-    API_KEY: "{{ randAlphaNum 24 }}"
-    ENCRYPTION_KEY: "{{ randAlphaNum 32 }}"
+# ------------------------------------------
+# Secret Configuration
+# ------------------------------------------
+
+secrets:
+  - API_KEY
+  - DB_PASSWORD
+  - JWT_SECRET
+  - ENCRYPTION_KEY
+
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+
+# Additional volume mounts (beyond configMap and secrets)
+volumeMounts:
+  []
+  # Example:
+  # - name: extra-config
+  #   mountPath: /app/extra
+  #   readOnly: true
+
+# Additional volumes (beyond configMap and secrets)
+volumes:
+  []
+  # Example:
+  # - name: extra-config
+  #   configMap:
+  #     name: extra-config-map
 
 # Node selector, tolerations, affinity
 nodeSelector: {}

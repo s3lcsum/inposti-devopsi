@@ -40,6 +40,8 @@ module "networking" {
   project_id                = var.project_id
   engineering_vpc_self_link = module.engineering_vpc.vpc_self_link
   runtime_vpc_self_link     = module.runtime_vpc.vpc_self_link
+  engineering_vpc_name      = module.engineering_vpc.vpc_name
+  runtime_vpc_name          = module.runtime_vpc.vpc_name
   engineering_subnet_cidr   = "10.0.10.0/24"
   runtime_subnet_cidr       = "10.0.20.0/24"
-} 
+}

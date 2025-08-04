@@ -1,13 +1,14 @@
-# Example terraform.tfvars for GKE Runtime Infrastructure
+# Example terraform.tfvars for GCS Runtime Infrastructure
 # Copy this file to terraform.tfvars and update the values
 
 # Required variables
 project_id = "your-gcp-project-id"
 
 # Environment-specific variables
-# Use one of the following files from terraform/runtime/variables/:
+# Use one of the following files from terraform/variables/:
 # - dev/us-central1.tfvars (for development)
 # - prd/us-central1.tfvars (for production)
+# - env/us-central1.tfvars (for engineering)
 
 # Example usage:
-# terraform plan -var-file="../variables/dev/us-central1.tfvars" 
+# terraform plan -var-file="../../variables/dev/us-central1.tfvars"

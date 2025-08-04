@@ -5,10 +5,10 @@ metadata:
   namespace: argocd
 spec:
   description: Project for runtime application charts across all environments
-  
+
   sourceRepos:
     - 'https://github.com/s3lcsum/inposti-devopsi.git'
-  
+
   destinations:
     - namespace: '*-dev'
       server: '*'
@@ -22,7 +22,7 @@ spec:
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'
-  
+
   # Roles for RBAC
   roles:
     - name: developer
@@ -32,7 +32,7 @@ spec:
         - p, proj:runtime:developer, applications, sync, runtime/*, allow
       groups:
         - developers
-    
+
     - name: admin
       description: Admin role with full access
       policies:

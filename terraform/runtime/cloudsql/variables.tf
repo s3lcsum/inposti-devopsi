@@ -58,4 +58,4 @@ variable "cloudsql_deletion_protection" {
   description = "Whether to enable deletion protection for the CloudSQL instance"
   type        = bool
   default     = true
-} 
+}

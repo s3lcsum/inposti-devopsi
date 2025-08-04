@@ -1,31 +1,14 @@
-# Production environment specific values for Spring Boot API
-# Only environment-specific overrides - everything else comes from charts/runtime/spring-api/values.yaml
-
 # Environment configuration
 environment: prd
 replicaCount: 5
-springProfile: prd
 
 # Ingress configuration
 ingress:
-  enabled: true
-  className: "nginx"
-  hosts:
-    - host: spring-api.example.com
-      paths:
-        - path: /api
-          pathType: Prefix
-          port: 8080
-        - path: /logs
-          pathType: Prefix
-          port: 8081
-        - path: /soap
-          pathType: Prefix
-          port: 8082
+  host: spring-api.prd.inposti-devopsi.com
   tls:
-    - secretName: spring-api-prd-tls
-      hosts:
-        - spring-api.example.com
+    - hosts:
+        - spring-api.prd.inposti-devopsi.com
+      secretName: spring-api-tls
 
 # Resource allocation (prod-specific)
 resources:
@@ -34,4 +17,4 @@ resources:
     memory: 256Mi
   limits:
     cpu: 1000m
-    memory: 1Gi 
+    memory: 1Gi

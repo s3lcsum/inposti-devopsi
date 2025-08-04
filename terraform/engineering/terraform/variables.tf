@@ -17,14 +17,15 @@ variable "zone" {
   default     = "us-central1-a"
 }
 
-variable "terraform_state_bucket_name" {
+
+
+variable "gcs_bucket_name" {
   description = "The name of the GCS bucket for Terraform state"
   type        = string
-  default     = "terraform-state-bucket"
 }
 
 variable "storage_location" {
   description = "The location of the GCS bucket"
   type        = string
   default     = "US"
-} 
+}

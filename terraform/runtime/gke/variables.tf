@@ -101,4 +101,4 @@ variable "gke_node_taints" {
     effect = string
   }))
   default = []
-} 
+}

@@ -17,11 +17,11 @@ spec:
           - clusters:
               selector:
                 matchExpressions:
-                  - key: environment
+                  - key: cluster
                     operator: In
                     values:
-                      - dev
-                      - prd
+                      - dev-global-cluster-0
+                      - prd-global-cluster-0
 
   template:
     metadata:

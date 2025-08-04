@@ -1,0 +1,7 @@
+# Development Environment Traefik Configuration
+
+traefik:
+  deployment:
+    replicas: 1
+
+environment: dev

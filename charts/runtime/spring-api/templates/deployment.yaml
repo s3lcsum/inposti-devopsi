@@ -5,25 +5,27 @@ metadata:
   labels:
     {{- include "spring-api.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
+
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
+
   selector:
     matchLabels:
       {{- include "spring-api.selectorLabels" . | nindent 6 }}
+
   template:
     metadata:
       annotations:
+        {{/* Automatic restart on config/secret changes */}}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
         {{- include "spring-api.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
@@ -35,55 +37,58 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "spring-api.serviceAccountName" . }}
+
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+
+          {{/* Image */}}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - "--spring.profiles.active={{ .Values.springProfile }}"
+            - "--spring.profiles.active={{ .Values.environment }}"
+
+          {{/* Ports */}}
           ports:
-            {{- range .Values.ports }}
-            - name: {{ .name }}
-              containerPort: {{ .containerPort }}
-              protocol: {{ .protocol }}
-            {{- end }}
+            - name: api
+              containerPort: 8080
+              protocol: TCP
+            - name: logs
+              containerPort: 8081
+              protocol: TCP
+            - name: soap
+              containerPort: 8082
+              protocol: TCP
+
+          {{/* Environment variables */}}
           env:
+            - name: ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+
+            {{/* Pod metadata fields */}}
             - name: POD_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: ENVIRONMENT
-              value: {{ .Values.environment }}
-            {{- if .Values.secret.enabled }}
-            - name: DB_PASSWORD
+
+            {{/* Secret-based environment variables */}}
+            {{- range $key, $config := .Values.secrets }}
+            - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "spring-api.fullname" . }}-secret
-                  key: DB_PASSWORD
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "spring-api.fullname" . }}-secret
-                  key: JWT_SECRET
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "spring-api.fullname" . }}-secret
-                  key: API_KEY
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "spring-api.fullname" . }}-secret
-                  key: ENCRYPTION_KEY
+                  name: {{ include "spring-api.fullname" $ }}-secret
+                  key: {{ $key }}
             {{- end }}
+
+          {{/* Health checks */}}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -92,33 +97,54 @@ spec:
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+
+          {{/* Resource allocation */}}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.configMap.enabled }}
+
+          {{/* Volume mounts */}}
+          {{- if or .Values.configMap.enabled .Values.volumeMounts }}
           volumeMounts:
+            {{/* ConfigMap volume mount */}}
+            {{- if .Values.configMap.enabled }}
             - name: config-volume
-              mountPath: /app/config.json
-              subPath: config.json
+              mountPath: {{ .Values.configMap.mountPath }}
+              subPath: {{ .Values.configMap.subPath }}
+            {{- end }}
+            {{/* Additional volume mounts */}}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
-          {{- with .Values.volumeMounts }}
-          {{- toYaml . | nindent 12 }}
-          {{- end }}
+
+          {{/* Pre-stop hook */}}
           lifecycle:
             preStop:
               exec:
                 command:
-                  {{- toYaml .Values.preStopHook.command | nindent 18 }}
-      {{- if .Values.configMap.enabled }}
+                  - /bin/sh
+                  - -c
+                  - "wget http://localhost:8080/service/shutdown"
+
+      {{/* Volumes */}}
+      {{- if or .Values.configMap.enabled .Values.volumes }}
       volumes:
+        {{/* ConfigMap volume */}}
+        {{- if .Values.configMap.enabled }}
         - name: config-volume
           configMap:
             name: {{ include "spring-api.fullname" . }}-config
+        {{- end }}
+
+        {{/* Additional volumes */}}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
-      {{- with .Values.volumes }}
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+
+      {{/* Node scheduling */}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

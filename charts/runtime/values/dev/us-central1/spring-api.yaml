@@ -1,37 +1,19 @@
-# Development environment specific values for Spring Boot API
-# Only environment-specific overrides - everything else comes from charts/runtime/spring-api/values.yaml
-
 # Environment configuration
 environment: dev
 replicaCount: 3
-springProfile: dev
 
-# Ingress configuration
 ingress:
-  enabled: true
-  className: "nginx"
-  hosts:
-    - host: spring-api-dev.example.com
-      paths:
-        - path: /api
-          pathType: Prefix
-          port: 8080
-        - path: /logs
-          pathType: Prefix
-          port: 8081
-        - path: /soap
-          pathType: Prefix
-          port: 8082
+  host: spring-api.dev.inposti-devopsi.com
   tls:
-    - secretName: spring-api-dev-tls
-      hosts:
-        - spring-api-dev.example.com
+    - hosts:
+        - spring-api.dev.inposti-devopsi.com
+      secretName: spring-api-tls
 
-# Resource allocation (dev-specific)
+# Resource allocation
 resources:
   requests:
     cpu: 100m
     memory: 128Mi
   limits:
     cpu: 500m
-    memory: 512Mi 
+    memory: 512Mi

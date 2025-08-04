@@ -1,55 +1,70 @@
+# Outputs for the community GKE module
+
 output "cluster_name" {
   description = "The name of the GKE cluster"
-  value       = google_container_cluster.primary.name
+  value       = module.gke.name
 }
 
 output "cluster_id" {
   description = "The ID of the GKE cluster"
-  value       = google_container_cluster.primary.id
+  value       = module.gke.cluster_id
 }
 
 output "cluster_endpoint" {
   description = "The IP address of the cluster master"
-  value       = google_container_cluster.primary.endpoint
+  value       = module.gke.endpoint
 }
 
 output "cluster_ca_certificate" {
   description = "The cluster CA certificate (base64 encoded)"
-  value       = google_container_cluster.primary.master_auth[0].cluster_ca_certificate
+  value       = module.gke.ca_certificate
   sensitive   = true
 }
 
 output "cluster_location" {
   description = "The location of the GKE cluster"
-  value       = google_container_cluster.primary.location
+  value       = module.gke.location
 }
 
 output "cluster_network" {
   description = "The network of the GKE cluster"
-  value       = google_container_cluster.primary.network
+  value       = var.network
 }
 
 output "cluster_subnetwork" {
   description = "The subnetwork of the GKE cluster"
-  value       = google_container_cluster.primary.subnetwork
+  value       = var.subnetwork
 }
 
 output "node_pool_name" {
   description = "The name of the node pool"
-  value       = google_container_node_pool.primary_nodes.name
+  value       = module.gke.node_pools_names[0]
 }
 
 output "node_pool_id" {
   description = "The ID of the node pool"
-  value       = google_container_node_pool.primary_nodes.id
+  value       = module.gke.node_pools_names[0]
 }
 
 output "service_account_email" {
   description = "The email of the GKE service account"
-  value       = google_service_account.gke_sa.email
+  value       = module.gke.service_account
 }
 
 output "workload_identity_pool" {
   description = "The workload identity pool"
-  value       = google_container_cluster.primary.workload_identity_config[0].workload_pool
-} 
+  value       = "${var.project_id}.svc.id.goog"
+}
+
+# Additional community module outputs
+# Note: kubeconfig_raw may not be available in private cluster module
+# output "kubeconfig_raw" {
+#   description = "A kubeconfig file configured to access the GKE cluster"
+#   value       = module.gke.kubeconfig_raw
+#   sensitive   = true
+# }
+
+output "master_version" {
+  description = "The current version of the master in the cluster"
+  value       = module.gke.master_version
+}

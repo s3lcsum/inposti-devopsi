@@ -10,4 +10,4 @@ zone   = "us-central1-a"
 
 # Terraform state bucket
 terraform_state_bucket_name = "terraform-state-bucket"
-storage_location = "US" 
+storage_location = "US"

@@ -48,6 +48,7 @@ Selector labels
 {{- define "spring-api.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "spring-api.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+environment: {{ .Values.environment }}
 {{- end }}
 
 {{/*

@@ -1,3 +1,5 @@
+# Variables for the community VPC module
+
 variable "project_id" {
   description = "The ID of the project to deploy to"
   type        = string
@@ -29,5 +31,3 @@ variable "subnets" {
     }
   ]
 }
-
- 

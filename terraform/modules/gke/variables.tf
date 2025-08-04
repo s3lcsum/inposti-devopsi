@@ -1,3 +1,5 @@
+# Variables for the community GKE module
+
 variable "project_id" {
   description = "The ID of the project to deploy to"
   type        = string
@@ -9,10 +11,16 @@ variable "cluster_name" {
   default     = "web-app-cluster"
 }
 
-variable "location" {
-  description = "The location of the GKE cluster"
+variable "region" {
+  description = "The region of the GKE cluster"
   type        = string
   default     = "us-central1"
+}
+
+variable "zones" {
+  description = "The zones to host the cluster in"
+  type        = list(string)
+  default     = ["us-central1-a", "us-central1-b", "us-central1-f"]
 }
 
 variable "cluster_ipv4_cidr_block" {
@@ -102,4 +110,10 @@ variable "node_taints" {
     effect = string
   }))
   default = []
-} 
+}
+
+variable "service_account" {
+  description = "The service account to be used by the Node VMs"
+  type        = string
+  default     = ""
+}

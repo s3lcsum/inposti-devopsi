@@ -1,0 +1,7 @@
+# Engineering Environment Traefik Configuration
+
+traefik:
+  deployment:
+    replicas: 1
+
+environment: eng

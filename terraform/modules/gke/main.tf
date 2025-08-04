@@ -1,214 +1,122 @@
-# GKE Module for Google Kubernetes Engine
-# This module creates a GKE cluster for the web application
+# GKE Module using Community Module
+# This module creates a GKE cluster using the official terraform-google-modules
 
-resource "google_container_cluster" "primary" {
-  name     = var.cluster_name
-  location = var.location
-  project  = var.project_id
+module "gke" {
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
+  version = "~> 32.0"
 
-  # Remove default node pool
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  project_id        = var.project_id
+  name              = var.cluster_name
+  region            = var.region
+  zones             = length(var.zones) > 0 ? var.zones : null
+  network           = var.network
+  subnetwork        = var.subnetwork
+  ip_range_pods     = var.cluster_ipv4_cidr_block
+  ip_range_services = var.services_ipv4_cidr_block
 
-  # Enable Workload Identity
-  workload_identity_config {
-    workload_pool = "${var.project_id}.svc.id.goog"
-  }
+  # Release channel for automatic updates
+  release_channel = var.release_channel
 
-  # Enable IP aliasing
-  ip_allocation_policy {
-    cluster_ipv4_cidr_block  = var.cluster_ipv4_cidr_block
-    services_ipv4_cidr_block = var.services_ipv4_cidr_block
-  }
-
-  # Network configuration
-  network    = var.network
-  subnetwork = var.subnetwork
-
-  # Enable private cluster
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = var.master_ipv4_cidr_block
-  }
+  # Private cluster configuration
+  enable_private_nodes    = true
+  enable_private_endpoint = false
+  master_ipv4_cidr_block  = var.master_ipv4_cidr_block
 
   # Master authorized networks
-  master_authorized_networks_config {
-    cidr_blocks {
+  master_authorized_networks = [
+    {
       cidr_block   = "0.0.0.0/0"
       display_name = "All"
     }
+  ]
+
+  # Network policy
+  network_policy             = true
+  network_policy_provider    = "CALICO"
+  horizontal_pod_autoscaling = true
+  http_load_balancing        = true
+
+  # Remove default node pool
+  remove_default_node_pool = true
+
+  # Node pools configuration
+  node_pools = [
+    {
+      name               = "${var.cluster_name}-node-pool"
+      machine_type       = var.machine_type
+      min_count          = var.min_node_count
+      max_count          = var.max_node_count
+      local_ssd_count    = 0
+      spot               = false
+      disk_size_gb       = var.disk_size_gb
+      disk_type          = "pd-ssd"
+      image_type         = "COS_CONTAINERD"
+      enable_gcfs        = false
+      enable_gvnic       = false
+      logging_variant    = "DEFAULT"
+      auto_repair        = true
+      auto_upgrade       = true
+      service_account    = var.service_account
+      preemptible        = false
+      initial_node_count = var.initial_node_count
+    }
+  ]
+
+  node_pools_oauth_scopes = {
+    all = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
   }
 
-  # Release channel for automatic updates
-  release_channel {
-    channel = var.release_channel
+  node_pools_labels = {
+    all                             = {}
+    "${var.cluster_name}-node-pool" = var.node_labels
   }
 
-  # Enable network policy
-  network_policy {
-    enabled = true
-    provider = "CALICO"
+  node_pools_metadata = {
+    all = {}
+    "${var.cluster_name}-node-pool" = {
+      node-pool-metadata-custom-value = "my-node-pool"
+    }
   }
 
-  # Enable horizontal pod autoscaling
-  addons_config {
-    horizontal_pod_autoscaling {
-      disabled = false
-    }
-    http_load_balancing {
-      disabled = false
-    }
-    network_policy_config {
-      disabled = false
-    }
+  node_pools_taints = {
+    all                             = []
+    "${var.cluster_name}-node-pool" = var.node_taints
+  }
+
+  node_pools_tags = {
+    all                             = []
+    "${var.cluster_name}-node-pool" = var.node_tags
   }
 
   # Maintenance window
-  maintenance_policy {
-    recurring_window {
-      start_time = "2023-01-01T02:00:00Z"
-      end_time   = "2023-01-01T06:00:00Z"
-      recurrence = "FREQ=WEEKLY;BYDAY=SU"
-    }
-  }
+  maintenance_start_time = "2023-01-01T02:00:00Z"
+  maintenance_end_time   = "2023-01-01T06:00:00Z"
+  maintenance_recurrence = "FREQ=WEEKLY;BYDAY=SU"
 
-  # Node auto-upgrade
-  node_config {
-    machine_type = var.machine_type
-    disk_size_gb = var.disk_size_gb
-    disk_type    = "pd-ssd"
-
-    # Enable workload identity
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    # OAuth scopes
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    # Labels
-    labels = var.node_labels
-
-    # Tags
-    tags = var.node_tags
-
-    # Metadata
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-  }
-
-  # Enable vertical pod autoscaling
-  vertical_pod_autoscaling {
-    enabled = true
-  }
-
-  # Enable cluster autoscaling
-  cluster_autoscaling {
-    enabled = true
+  # Cluster autoscaling
+  cluster_autoscaling = {
+    enabled             = true
     autoscaling_profile = "OPTIMIZE_UTILIZATION"
-
-    resource_limits {
-      resource_type = "cpu"
-      minimum       = 1
-      maximum       = 8
-    }
-
-    resource_limits {
-      resource_type = "memory"
-      minimum       = 2
-      maximum       = 32
-    }
+    min_cpu_cores       = 1
+    max_cpu_cores       = 8
+    min_memory_gb       = 2
+    max_memory_gb       = 32
+    gpu_resources       = []
+    auto_repair         = true
+    auto_upgrade        = true
   }
+
+  # Create service account
+  create_service_account = true
 }
 
-# Create node pools for different workloads
-resource "google_container_node_pool" "primary_nodes" {
-  name       = "${var.cluster_name}-node-pool"
-  location   = var.location
-  cluster    = google_container_cluster.primary.name
-  project    = var.project_id
-  node_count = var.initial_node_count
-
-  autoscaling {
-    min_node_count = var.min_node_count
-    max_node_count = var.max_node_count
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    machine_type = var.machine_type
-    disk_size_gb = var.disk_size_gb
-    disk_type    = "pd-ssd"
-
-    # Enable workload identity
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    # OAuth scopes
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    # Labels
-    labels = var.node_labels
-
-    # Tags
-    tags = var.node_tags
-
-    # Metadata
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    # Taints for dedicated workloads (optional)
-    dynamic "taint" {
-      for_each = var.node_taints
-      content {
-        key    = taint.value.key
-        value  = taint.value.value
-        effect = taint.value.effect
-      }
-    }
-  }
-}
-
-# Create a service account for the GKE cluster
-resource "google_service_account" "gke_sa" {
-  account_id   = "${var.cluster_name}-sa"
-  display_name = "Service Account for ${var.cluster_name} GKE cluster"
-  project      = var.project_id
-}
-
-# Grant the service account the necessary roles
-resource "google_project_iam_member" "gke_sa_logging" {
+# Enable Workload Identity for the GKE cluster
+resource "google_project_iam_member" "gke_workload_identity_user" {
   project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.gke_sa.email}"
+  role    = "roles/iam.workloadIdentityUser"
+  member  = "serviceAccount:${var.project_id}.svc.id.goog[default/default]"
 }
-
-resource "google_project_iam_member" "gke_sa_monitoring" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.gke_sa.email}"
-}
-
-resource "google_project_iam_member" "gke_sa_storage" {
-  project = var.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${google_service_account.gke_sa.email}"
-} 

@@ -7,11 +7,11 @@
 module "terraform_state" {
   source = "../../modules/gcs"
 
-  project_id   = var.project_id
-  bucket_name  = var.terraform_state_bucket_name
-  location     = var.storage_location
+  project_id    = var.project_id
+  bucket_name   = var.gcs_bucket_name
+  location      = var.storage_location
   force_destroy = false
-  cors_origins = []
+  cors_origins  = []
 }
 
 # Create service account for Terraform operations
@@ -59,4 +59,4 @@ resource "google_secret_manager_secret" "terraform_sa_key" {
 resource "google_secret_manager_secret_version" "terraform_sa_key" {
   secret      = google_secret_manager_secret.terraform_sa_key.id
   secret_data = base64decode(google_service_account_key.terraform_sa_key.private_key)
-} 
+}

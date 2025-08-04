@@ -1,3 +1,5 @@
+# Variables for the community GCS module
+
 variable "project_id" {
   description = "The ID of the project to deploy to"
   type        = string
@@ -24,4 +26,4 @@ variable "cors_origins" {
   description = "List of CORS origins"
   type        = list(string)
   default     = ["*"]
-} 
+}

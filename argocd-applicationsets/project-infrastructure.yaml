@@ -5,10 +5,10 @@ metadata:
   namespace: argocd
 spec:
   description: Project for infrastructure charts (traefik, cert-manager, etc.) across all clusters
-  
+
   sourceRepos:
     - 'https://github.com/s3lcsum/inposti-devopsi.git'
-  
+
   destinations:
     - namespace: '*'
       server: '*'
@@ -20,7 +20,7 @@ spec:
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'
-  
+
   roles:
     - name: infrastructure-admin
       description: Infrastructure admin role with full access
@@ -29,4 +29,3 @@ spec:
       groups:
         - infrastructure-admins
         - platform-engineers
-    

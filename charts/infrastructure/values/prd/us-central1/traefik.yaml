@@ -1,0 +1,20 @@
+# Production Environment Traefik Configuration
+
+traefik:
+  deployment:
+    replicas: 3
+
+  # Enable metrics for production monitoring
+  metrics:
+    prometheus:
+      enabled: true
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 100Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+environment: prd
